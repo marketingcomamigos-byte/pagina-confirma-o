@@ -31,7 +31,7 @@
         .icon { font-size: 4rem; margin-bottom: 16px; }
         .success { color: #2e7d32; }
         .error { color: #c62828; }
-        .warning { color: #f57f17; }
+        .warning { color: #e65100; }
         .loading { color: #1a2a6c; }
         .btn {
             display: inline-block;
@@ -50,21 +50,13 @@
         .btn:hover { opacity: 0.9; }
         .btn:disabled { opacity: 0.5; cursor: not-allowed; }
         .btn-success { background: #2e7d32; }
+        .btn-success:hover { background: #1b5e20; }
         .btn-gray { background: #6b7280; }
         .btn-gray:hover { background: #4b5563; }
         .btn-whatsapp { background: #25D366; }
         .btn-whatsapp:hover { background: #1da851; }
         .btn-danger { background: #c62828; }
         .btn-danger:hover { background: #b71c1c; }
-        .btn-outline {
-            background: transparent;
-            border: 2px solid #1a2a6c;
-            color: #1a2a6c;
-        }
-        .btn-outline:hover {
-            background: #1a2a6c;
-            color: white;
-        }
         input[type="email"] {
             width: 100%;
             padding: 12px;
@@ -115,7 +107,6 @@
         .gap-8 { gap: 8px; }
         .text-sm { font-size: 0.85rem; color: #6b7280; }
         .text-error { color: #c62828; font-size: 0.85rem; }
-        .text-warning { color: #f57f17; font-size: 0.85rem; }
         .hidden { display: none; }
         .tentativas-box {
             background: #fff8e1;
@@ -127,6 +118,19 @@
         .tentativas-box .contador {
             font-weight: 700;
             color: #e65100;
+        }
+        .conta-info {
+            background: #e3f2fd;
+            padding: 16px;
+            border-radius: 8px;
+            margin: 8px 0;
+            text-align: left;
+        }
+        .conta-info p {
+            margin: 4px 0;
+        }
+        .conta-info strong {
+            color: #0d47a1;
         }
     </style>
 </head>
@@ -211,17 +215,28 @@
             );
         }
 
-        function mostrarErro(mensagem, email) {
+        // ============================================================
+        // FUNÇÃO PARA MOSTRAR QUE A CONTA JÁ FOI ATIVADA
+        // ============================================================
+        function mostrarContaJaAtivada(conta) {
+            const dataFormatada = conta.ativado_em 
+                ? new Date(conta.ativado_em).toLocaleDateString('pt-BR') 
+                : 'Data desconhecida';
+
             renderizar(
-                '❌',
-                'Erro ao ativar premium',
-                'error',
-                mensagem,
+                '🔒',
+                'Este código já foi utilizado!',
+                'warning',
+                `Este código de pagamento já foi usado para ativar uma conta.`,
                 `
-                    <a href="https://wa.me/${WHATSAPP_NUMERO}?text=Olá! Tive um problema ao ativar meu premium. Meu email é: ${email || 'não informado'}" class="btn btn-whatsapp">📱 Falar com Suporte</a>
-                    <a href="${SISTEMA_URL}" class="btn btn-gray">Voltar para o Sistema</a>
+                    <div class="conta-info">
+                        <p><strong>📧 Conta ativada:</strong> ${conta.email}</p>
+                        <p><strong>📅 Data:</strong> ${dataFormatada}</p>
+                        <p style="font-size: 0.8rem; color: #6b7280; margin-top: 4px;">Cada código de pagamento só pode ser usado uma vez.</p>
+                    </div>
+                    <a href="${SISTEMA_URL}" class="btn btn-gray">🔙 Voltar para o Sistema</a>
                 `,
-                `<div class="detalhes-box"><strong>Parâmetros recebidos:</strong><br>${Object.entries(params).map(([k,v]) => `<strong>${k}:</strong> ${v}`).join('<br>') || 'Nenhum parâmetro'}</div>`
+                `<p class="text-sm">Se você não reconhece esta conta, entre em contato com o suporte.</p>`
             );
         }
 
@@ -256,7 +271,6 @@
                     <p class="text-sm mt-8">Seu email está seguro. Usamos apenas para ativar sua conta.</p>
                 `;
             } else {
-                // 3 tentativas falharam - mostrar botão de suporte
                 html += `
                     <div class="tentativas-box" style="background:#ffebee; border-color:#ef9a9a;">
                         <p style="color: #c62828; font-weight: 600;">⚠️ Limite de tentativas excedido</p>
@@ -268,7 +282,6 @@
                 `;
             }
 
-            // Parâmetros recebidos (sempre visível)
             html += `
                 <div class="detalhes-box mt-8">
                     <strong>Parâmetros recebidos:</strong><br>
@@ -278,17 +291,14 @@
 
             container.innerHTML = html;
 
-            // Foco no input se tiver
             const input = document.getElementById('emailInput');
             if (input) {
                 input.focus();
-                // Selecionar texto se já tiver algo
                 if (input.value) {
                     input.select();
                 }
             }
 
-            // Função global para ativar com email
             window.ativarComEmail = async function() {
                 const emailInput = document.getElementById('emailInput');
                 const email = emailInput.value.trim();
@@ -298,7 +308,6 @@
                     return;
                 }
 
-                // Validar email básico
                 if (!email.includes('@') || !email.includes('.')) {
                     mostrarCampoEmail('Digite um email válido (ex: nome@dominio.com)');
                     return;
@@ -307,24 +316,24 @@
                 tentativas++;
                 emailAtual = email;
 
-                // Mostrar loading
                 mostrarCarregando();
 
                 try {
                     const result = await ativarPremium(email);
                     if (result.success) {
-                        mostrarSucesso(email);
+                        if (result.already_activated) {
+                            mostrarContaJaAtivada(result.conta);
+                        } else {
+                            mostrarSucesso(email);
+                        }
                     } else {
-                        // Se errou, mostrar campo novamente com erro
                         mostrarCampoEmail(result.error || 'Email não encontrado. Tente novamente.');
                     }
                 } catch (error) {
-                    // Erro na requisição
                     mostrarCampoEmail('Erro ao conectar. Tente novamente.');
                 }
             };
 
-            // Enter no input
             const inputEl = document.getElementById('emailInput');
             if (inputEl) {
                 inputEl.addEventListener('keydown', function(e) {
@@ -359,6 +368,16 @@
 
                 const result = await response.json();
                 if (!response.ok) throw new Error(result.error || 'Erro ao ativar premium');
+
+                // Verificar se já foi ativado antes
+                if (result.already_activated) {
+                    return {
+                        success: true,
+                        already_activated: true,
+                        conta: result.conta
+                    };
+                }
+
                 return result;
 
             } catch (error) {
@@ -371,30 +390,37 @@
         // PROCESSAR O RETORNO
         // ============================================================
         function processarPagamento() {
-            // Se não tem parâmetros
             if (Object.keys(params).length === 0) {
-                mostrarErro('Nenhum parâmetro recebido. Você pode ter acessado esta página diretamente.', null);
+                renderizar(
+                    '🤔',
+                    'Nenhum parâmetro recebido',
+                    'error',
+                    'Você pode ter acessado esta página diretamente.',
+                    `
+                        <a href="${SISTEMA_URL}" class="btn btn-gray">🔙 Voltar para o Sistema</a>
+                    `,
+                    ''
+                );
                 return;
             }
 
             // 🔥 SE TEM preapproval_id, ATIVAR PREMIUM IMEDIATAMENTE
             if (preapprovalId) {
-                // Tentar buscar o email de várias fontes
                 let email = null;
                 if (params.email) email = params.email;
                 else if (externalReference) email = externalReference;
                 else if (params.payer_email) email = params.payer_email;
 
                 if (email) {
-                    // Tentar ativar automaticamente
-                    tentativas = 1; // Já usou uma tentativa
+                    tentativas = 1;
                     mostrarCarregando();
                     ativarPremium(email)
                         .then(result => {
-                            if (result.success) {
+                            if (result.already_activated) {
+                                mostrarContaJaAtivada(result.conta);
+                            } else if (result.success) {
                                 mostrarSucesso(email);
                             } else {
-                                // Se falhou, mostrar campo com 2 tentativas restantes
                                 mostrarCampoEmail('Email não encontrado. Tente novamente.');
                             }
                         })
@@ -402,14 +428,20 @@
                             mostrarCampoEmail('Erro ao conectar. Tente novamente.');
                         });
                 } else {
-                    // Não tem email, pedir ao usuário
                     mostrarCampoEmail();
                 }
             } else {
-                // Se não tem preapproval_id
-                mostrarErro(
-                    'Nenhum ID de assinatura foi encontrado. Entre em contato com o suporte.',
-                    null
+                renderizar(
+                    '❌',
+                    'Código não encontrado',
+                    'error',
+                    'Nenhum ID de assinatura foi encontrado.',
+                    `
+                        <a href="https://wa.me/${WHATSAPP_NUMERO}?text=Olá! Tentei ativar meu premium mas não consegui." 
+                           class="btn btn-whatsapp">📱 Falar com Suporte</a>
+                        <a href="${SISTEMA_URL}" class="btn btn-gray">Voltar para o Sistema</a>
+                    `,
+                    `<div class="detalhes-box"><strong>Parâmetros recebidos:</strong><br>${Object.entries(params).map(([k,v]) => `<strong>${k}:</strong> ${v}`).join('<br>') || 'Nenhum'}</div>`
                 );
             }
         }
