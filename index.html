@@ -31,6 +31,7 @@
         .icon { font-size: 4rem; margin-bottom: 16px; }
         .success { color: #2e7d32; }
         .error { color: #c62828; }
+        .warning { color: #f57f17; }
         .loading { color: #1a2a6c; }
         .btn {
             display: inline-block;
@@ -44,13 +45,26 @@
             font-weight: 600;
             width: 100%;
             box-sizing: border-box;
+            transition: opacity 0.3s;
         }
         .btn:hover { opacity: 0.9; }
+        .btn:disabled { opacity: 0.5; cursor: not-allowed; }
         .btn-success { background: #2e7d32; }
         .btn-gray { background: #6b7280; }
         .btn-gray:hover { background: #4b5563; }
         .btn-whatsapp { background: #25D366; }
         .btn-whatsapp:hover { background: #1da851; }
+        .btn-danger { background: #c62828; }
+        .btn-danger:hover { background: #b71c1c; }
+        .btn-outline {
+            background: transparent;
+            border: 2px solid #1a2a6c;
+            color: #1a2a6c;
+        }
+        .btn-outline:hover {
+            background: #1a2a6c;
+            color: white;
+        }
         input[type="email"] {
             width: 100%;
             padding: 12px;
@@ -59,10 +73,15 @@
             font-size: 1rem;
             margin-top: 8px;
             box-sizing: border-box;
+            transition: border-color 0.3s;
         }
         input[type="email"]:focus {
             border-color: #1a2a6c;
             outline: none;
+        }
+        input[type="email"].error-input {
+            border-color: #c62828;
+            background: #fff5f5;
         }
         .detalhes-box {
             background: #f8f9fa;
@@ -73,6 +92,8 @@
             color: #6b7280;
             text-align: left;
             word-break: break-all;
+            max-height: 150px;
+            overflow-y: auto;
         }
         .spinner {
             border: 4px solid #f3f3f3;
@@ -93,6 +114,20 @@
         .flex-col { flex-direction: column; }
         .gap-8 { gap: 8px; }
         .text-sm { font-size: 0.85rem; color: #6b7280; }
+        .text-error { color: #c62828; font-size: 0.85rem; }
+        .text-warning { color: #f57f17; font-size: 0.85rem; }
+        .hidden { display: none; }
+        .tentativas-box {
+            background: #fff8e1;
+            border: 1px solid #ffcc80;
+            border-radius: 8px;
+            padding: 12px;
+            margin-top: 12px;
+        }
+        .tentativas-box .contador {
+            font-weight: 700;
+            color: #e65100;
+        }
     </style>
 </head>
 <body>
@@ -108,6 +143,7 @@
         const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJwcm9janB6eWRrb25kcmd1enVpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM2ODA2NjIsImV4cCI6MjA3OTI1NjY2Mn0.bD36ix62EYFdnnTKXN3iK9C9AoOeKyWGkY10D-A1tm0';
         const SISTEMA_URL = 'https://istart-nova.vercel.app';
         const WHATSAPP_NUMERO = '5544997311635';
+        const MAX_TENTATIVAS = 3;
 
         // ============================================================
         // PEGAR PARÂMETROS DA URL
@@ -124,6 +160,12 @@
         const status = params.status || params.collection_status;
         const externalReference = params.external_reference;
         const collectionId = params.collection_id || params.payment_id;
+
+        // ============================================================
+        // ESTADO
+        // ============================================================
+        let tentativas = 0;
+        let emailAtual = '';
 
         // ============================================================
         // REFERÊNCIA AO CONTAINER
@@ -165,7 +207,7 @@
                 `
                     <a href="${SISTEMA_URL}" class="btn btn-success">🚀 Ir para o Sistema</a>
                 `,
-                `<p class="text-sm">Email: ${email}</p>`
+                `<p class="text-sm">✅ Email: ${email}</p>`
             );
         }
 
@@ -183,27 +225,89 @@
             );
         }
 
-        function mostrarCampoEmail() {
-            container.innerHTML = `
+        // ============================================================
+        // FUNÇÃO PARA MOSTRAR CAMPO DE EMAIL COM TENTATIVAS
+        // ============================================================
+        function mostrarCampoEmail(mensagemErro) {
+            const tentativasRestantes = MAX_TENTATIVAS - tentativas;
+            const podeTentar = tentativas < MAX_TENTATIVAS;
+
+            let html = `
                 <div class="icon">📧</div>
-                <h1 class="loading">Precisamos do seu email</h1>
-                <p style="margin: 8px 0 16px;">Para ativar seu premium, informe o email cadastrado no iStart:</p>
-                <input type="email" id="emailInput" placeholder="seu@email.com">
-                <button onclick="ativarComEmail()" class="btn btn-success mt-8">✅ Ativar Premium</button>
-                <p class="text-sm mt-8">Seu email está seguro. Usamos apenas para ativar sua conta.</p>
-                <div class="detalhes-box mt-8"><strong>Parâmetros recebidos:</strong><br>${Object.entries(params).map(([k,v]) => `<strong>${k}:</strong> ${v}`).join('<br>') || 'Nenhum parâmetro'}</div>
-                <a href="${SISTEMA_URL}" class="btn btn-gray mt-8">Voltar para o Sistema</a>
+                <h1 class="${podeTentar ? 'loading' : 'error'}">${podeTentar ? 'Precisamos do seu email' : 'Não foi possível ativar'}</h1>
+                <p style="margin: 8px 0 16px;">
+                    ${podeTentar 
+                        ? 'Para ativar seu premium, informe o email cadastrado no iStart:' 
+                        : 'Você atingiu o limite de tentativas. Entre em contato com o suporte.'}
+                </p>
             `;
 
+            if (mensagemErro) {
+                html += `<p class="text-error">${mensagemErro}</p>`;
+            }
+
+            if (podeTentar) {
+                html += `
+                    <div class="tentativas-box">
+                        <span class="contador">${tentativasRestantes}</span> tentativa(s) restante(s)
+                    </div>
+                    <input type="email" id="emailInput" placeholder="seu@email.com" value="${emailAtual}">
+                    <button onclick="ativarComEmail()" class="btn btn-success mt-8">✅ Ativar Premium</button>
+                    <p class="text-sm mt-8">Seu email está seguro. Usamos apenas para ativar sua conta.</p>
+                `;
+            } else {
+                // 3 tentativas falharam - mostrar botão de suporte
+                html += `
+                    <div class="tentativas-box" style="background:#ffebee; border-color:#ef9a9a;">
+                        <p style="color: #c62828; font-weight: 600;">⚠️ Limite de tentativas excedido</p>
+                        <p style="font-size: 0.85rem; margin-top: 4px;">Entre em contato com o suporte para ativar manualmente.</p>
+                    </div>
+                    <a href="https://wa.me/${WHATSAPP_NUMERO}?text=Olá! Tentei ativar meu premium mas não consegui. Meu email é: ${emailAtual || 'não informado'}" 
+                       class="btn btn-whatsapp mt-8">📱 Falar com Suporte</a>
+                    <a href="${SISTEMA_URL}" class="btn btn-gray mt-8">Voltar para o Sistema</a>
+                `;
+            }
+
+            // Parâmetros recebidos (sempre visível)
+            html += `
+                <div class="detalhes-box mt-8">
+                    <strong>Parâmetros recebidos:</strong><br>
+                    ${Object.entries(params).map(([k,v]) => `<strong>${k}:</strong> ${v}`).join('<br>') || 'Nenhum parâmetro'}
+                </div>
+            `;
+
+            container.innerHTML = html;
+
+            // Foco no input se tiver
+            const input = document.getElementById('emailInput');
+            if (input) {
+                input.focus();
+                // Selecionar texto se já tiver algo
+                if (input.value) {
+                    input.select();
+                }
+            }
+
+            // Função global para ativar com email
             window.ativarComEmail = async function() {
                 const emailInput = document.getElementById('emailInput');
                 const email = emailInput.value.trim();
 
                 if (!email) {
-                    alert('Por favor, digite seu email.');
+                    mostrarCampoEmail('Por favor, digite seu email.');
                     return;
                 }
 
+                // Validar email básico
+                if (!email.includes('@') || !email.includes('.')) {
+                    mostrarCampoEmail('Digite um email válido (ex: nome@dominio.com)');
+                    return;
+                }
+
+                tentativas++;
+                emailAtual = email;
+
+                // Mostrar loading
                 mostrarCarregando();
 
                 try {
@@ -211,12 +315,24 @@
                     if (result.success) {
                         mostrarSucesso(email);
                     } else {
-                        mostrarErro(result.error || 'Erro ao ativar premium.', email);
+                        // Se errou, mostrar campo novamente com erro
+                        mostrarCampoEmail(result.error || 'Email não encontrado. Tente novamente.');
                     }
                 } catch (error) {
-                    mostrarErro('Erro ao ativar premium. Entre em contato com o suporte.', email);
+                    // Erro na requisição
+                    mostrarCampoEmail('Erro ao conectar. Tente novamente.');
                 }
             };
+
+            // Enter no input
+            const inputEl = document.getElementById('emailInput');
+            if (inputEl) {
+                inputEl.addEventListener('keydown', function(e) {
+                    if (e.key === 'Enter') {
+                        window.ativarComEmail();
+                    }
+                });
+            }
         }
 
         // ============================================================
@@ -252,10 +368,10 @@
         }
 
         // ============================================================
-        // 🔥 NOVA LÓGICA: ATIVAR PREMIUM SE TIVER preapproval_id
+        // PROCESSAR O RETORNO
         // ============================================================
         function processarPagamento() {
-            // Se não tem parâmetros, mostrar erro
+            // Se não tem parâmetros
             if (Object.keys(params).length === 0) {
                 mostrarErro('Nenhum parâmetro recebido. Você pode ter acessado esta página diretamente.', null);
                 return;
@@ -263,33 +379,34 @@
 
             // 🔥 SE TEM preapproval_id, ATIVAR PREMIUM IMEDIATAMENTE
             if (preapprovalId) {
-                // Tentar buscar o email
+                // Tentar buscar o email de várias fontes
                 let email = null;
-
-                // Tenta pegar de várias fontes
                 if (params.email) email = params.email;
                 else if (externalReference) email = externalReference;
                 else if (params.payer_email) email = params.payer_email;
 
                 if (email) {
+                    // Tentar ativar automaticamente
+                    tentativas = 1; // Já usou uma tentativa
                     mostrarCarregando();
                     ativarPremium(email)
                         .then(result => {
                             if (result.success) {
                                 mostrarSucesso(email);
                             } else {
-                                mostrarErro(result.error || 'Erro ao ativar premium. Entre em contato com o suporte.', email);
+                                // Se falhou, mostrar campo com 2 tentativas restantes
+                                mostrarCampoEmail('Email não encontrado. Tente novamente.');
                             }
                         })
                         .catch(() => {
-                            mostrarErro('Erro ao ativar premium. Entre em contato com o suporte.', email);
+                            mostrarCampoEmail('Erro ao conectar. Tente novamente.');
                         });
                 } else {
-                    // Se não tem email, pedir ao usuário
+                    // Não tem email, pedir ao usuário
                     mostrarCampoEmail();
                 }
             } else {
-                // Se não tem preapproval_id, mostrar erro
+                // Se não tem preapproval_id
                 mostrarErro(
                     'Nenhum ID de assinatura foi encontrado. Entre em contato com o suporte.',
                     null
