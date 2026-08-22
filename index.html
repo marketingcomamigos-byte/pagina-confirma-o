@@ -5,14 +5,19 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Confirmação - iStart</title>
     <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', system-ui, sans-serif;
+        }
         body {
-            font-family: Arial, sans-serif;
             display: flex;
             justify-content: center;
             align-items: center;
             min-height: 100vh;
-            margin: 0;
             background: #f5f7fa;
+            padding: 20px;
         }
         .container {
             background: white;
@@ -21,12 +26,12 @@
             box-shadow: 0 4px 20px rgba(0,0,0,0.1);
             text-align: center;
             max-width: 500px;
-            width: 90%;
+            width: 100%;
         }
-        .loading { color: #1a2a6c; }
+        .icon { font-size: 4rem; margin-bottom: 16px; }
         .success { color: #2e7d32; }
         .error { color: #c62828; }
-        .icon { font-size: 4rem; margin-bottom: 16px; }
+        .loading { color: #1a2a6c; }
         .btn {
             display: inline-block;
             padding: 12px 24px;
@@ -34,15 +39,18 @@
             color: white;
             text-decoration: none;
             border-radius: 8px;
-            margin-top: 16px;
             border: none;
             cursor: pointer;
+            font-weight: 600;
+            width: 100%;
+            box-sizing: border-box;
         }
         .btn:hover { opacity: 0.9; }
-        .btn-whatsapp { background: #25D366; }
-        .btn-whatsapp:hover { background: #1da851; }
+        .btn-success { background: #2e7d32; }
         .btn-gray { background: #6b7280; }
         .btn-gray:hover { background: #4b5563; }
+        .btn-whatsapp { background: #25D366; }
+        .btn-whatsapp:hover { background: #1da851; }
         input[type="email"] {
             width: 100%;
             padding: 12px;
@@ -66,7 +74,6 @@
             text-align: left;
             word-break: break-all;
         }
-        .hidden { display: none; }
         .spinner {
             border: 4px solid #f3f3f3;
             border-top: 4px solid #1a2a6c;
@@ -80,11 +87,17 @@
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
+        .mt-8 { margin-top: 8px; }
+        .mt-16 { margin-top: 16px; }
+        .flex { display: flex; }
+        .flex-col { flex-direction: column; }
+        .gap-8 { gap: 8px; }
+        .text-sm { font-size: 0.85rem; color: #6b7280; }
     </style>
 </head>
 <body>
     <div class="container" id="statusContainer">
-        <!-- Estados serão inseridos pelo JavaScript -->
+        <!-- O JavaScript vai preencher aqui -->
     </div>
 
     <script>
@@ -93,30 +106,24 @@
         // ============================================================
         const SUPABASE_URL = 'https://rprocjpzydkondrguzui.supabase.co';
         const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJwcm9janB6eWRrb25kcmd1enVpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM2ODA2NjIsImV4cCI6MjA3OTI1NjY2Mn0.bD36ix62EYFdnnTKXN3iK9C9AoOeKyWGkY10D-A1tm0';
-        
-        // ✅ URL DO SEU SISTEMA (CORRIGIDA)
         const SISTEMA_URL = 'https://istart-nova.vercel.app';
         const WHATSAPP_NUMERO = '5544997311635';
 
         // ============================================================
-        // PEGAR TODOS OS PARÂMETROS DA URL
+        // PEGAR PARÂMETROS DA URL
         // ============================================================
         const urlParams = new URLSearchParams(window.location.search);
-        
-        // Mapear todos os parâmetros possíveis
         const params = {};
         for (const [key, value] of urlParams.entries()) {
             params[key] = value;
         }
 
-        console.log('📥 Todos os parâmetros recebidos:', params);
+        console.log('📥 Parâmetros recebidos:', params);
 
-        // Parâmetros do Mercado Pago
-        const collectionId = params.collection_id || params.payment_id;
-        const collectionStatus = params.collection_status || params.status;
-        const preapprovalId = params.preapproval_id;
+        const preapprovalId = params.preapproval_id || params.pref_id;
+        const status = params.status || params.collection_status;
         const externalReference = params.external_reference;
-        const merchantOrderId = params.merchant_order_id;
+        const collectionId = params.collection_id || params.payment_id;
 
         // ============================================================
         // REFERÊNCIA AO CONTAINER
@@ -124,114 +131,70 @@
         const container = document.getElementById('statusContainer');
 
         // ============================================================
-        // FUNÇÃO PARA RENDERIZAR ESTADO
+        // FUNÇÕES DE RENDERIZAÇÃO
         // ============================================================
-        function renderizarEstado(icon, titulo, mensagem, botoes, detalhesExtra) {
+        function renderizar(icon, titulo, classe, mensagem, botoes, detalhes) {
             container.innerHTML = `
                 <div class="icon">${icon}</div>
-                <h1 class="${titulo.includes('Sucesso') ? 'success' : titulo.includes('Erro') ? 'error' : 'loading'}">${titulo}</h1>
-                <p>${mensagem}</p>
-                ${detalhesExtra || ''}
-                <div style="margin-top: 16px;">
-                    ${botoes}
+                <h1 class="${classe}">${titulo}</h1>
+                <p style="margin: 8px 0 16px;">${mensagem}</p>
+                ${detalhes || ''}
+                <div class="flex flex-col gap-8 mt-16">
+                    ${botoes || ''}
                 </div>
             `;
         }
 
-        // ============================================================
-        // FUNÇÃO PARA MOSTRAR CARREGANDO
-        // ============================================================
         function mostrarCarregando() {
-            container.innerHTML = `
-                <div class="spinner"></div>
-                <h1 class="loading">Processando seu pagamento...</h1>
-                <p>Aguarde enquanto confirmamos sua assinatura.</p>
-            `;
+            renderizar(
+                '⏳',
+                'Processando...',
+                'loading',
+                'Aguarde enquanto ativamos seu premium.',
+                '',
+                `<div class="spinner"></div>`
+            );
         }
 
-        // ============================================================
-        // FUNÇÃO PARA MOSTRAR ERRO
-        // ============================================================
-        function mostrarErro(mensagemErro, email) {
-            renderizarEstado(
+        function mostrarSucesso(email) {
+            renderizar(
+                '🎉',
+                'Premium Ativado com Sucesso!',
+                'success',
+                `Agora você tem acesso a todas as funcionalidades premium do iStart.`,
+                `
+                    <a href="${SISTEMA_URL}" class="btn btn-success">🚀 Ir para o Sistema</a>
+                `,
+                `<p class="text-sm">Email: ${email}</p>`
+            );
+        }
+
+        function mostrarErro(mensagem, email) {
+            renderizar(
                 '❌',
                 'Erro ao ativar premium',
-                mensagemErro,
+                'error',
+                mensagem,
                 `
-                    <a href="https://wa.me/${WHATSAPP_NUMERO}?text=Olá! Tive um problema ao ativar meu premium. Meu email é: ${email || 'não informado'}" 
-                       class="btn btn-whatsapp" style="display: inline-block; width: 100%; box-sizing: border-box;">
-                        📱 Falar com Suporte
-                    </a>
-                    <br>
-                    <a href="${SISTEMA_URL}" class="btn btn-gray" style="display: inline-block; width: 100%; box-sizing: border-box; margin-top: 8px;">
-                        Voltar para o Sistema
-                    </a>
+                    <a href="https://wa.me/${WHATSAPP_NUMERO}?text=Olá! Tive um problema ao ativar meu premium. Meu email é: ${email || 'não informado'}" class="btn btn-whatsapp">📱 Falar com Suporte</a>
+                    <a href="${SISTEMA_URL}" class="btn btn-gray">Voltar para o Sistema</a>
                 `,
                 `<div class="detalhes-box"><strong>Parâmetros recebidos:</strong><br>${Object.entries(params).map(([k,v]) => `<strong>${k}:</strong> ${v}`).join('<br>') || 'Nenhum parâmetro'}</div>`
             );
         }
 
-        // ============================================================
-        // FUNÇÃO PARA MOSTRAR SUCESSO
-        // ============================================================
-        function mostrarSucesso(email) {
-            renderizarEstado(
-                '✅',
-                'Premium Ativado com Sucesso! 🎉',
-                `Agora você tem acesso a todas as funcionalidades premium do iStart.`,
-                `
-                    <a href="${SISTEMA_URL}" class="btn" style="display: inline-block; width: 100%; box-sizing: border-box;">
-                        🚀 Ir para o Sistema
-                    </a>
-                `,
-                `<p style="font-size: 0.9rem; color: #6b7280; margin-top: 8px;">Email: ${email}</p>`
-            );
-        }
-
-        // ============================================================
-        // FUNÇÃO PARA MOSTRAR STATUS DESCONHECIDO
-        // ============================================================
-        function mostrarStatusDesconhecido() {
-            renderizarEstado(
-                '🤔',
-                'Status do pagamento: desconhecido',
-                'Não foi possível identificar o status do seu pagamento.',
-                `
-                    <a href="https://wa.me/${WHATSAPP_NUMERO}?text=Olá! Fiz o pagamento mas o sistema não reconheceu." 
-                       class="btn btn-whatsapp" style="display: inline-block; width: 100%; box-sizing: border-box;">
-                        📱 Falar com Suporte
-                    </a>
-                    <br>
-                    <a href="${SISTEMA_URL}" class="btn btn-gray" style="display: inline-block; width: 100%; box-sizing: border-box; margin-top: 8px;">
-                        Voltar para o Sistema
-                    </a>
-                `,
-                `<div class="detalhes-box"><strong>Parâmetros recebidos:</strong><br>${Object.entries(params).map(([k,v]) => `<strong>${k}:</strong> ${v}`).join('<br>') || 'Nenhum parâmetro recebido'}</div>`
-            );
-        }
-
-        // ============================================================
-        // FUNÇÃO PARA MOSTRAR CAMPO DE EMAIL
-        // ============================================================
         function mostrarCampoEmail() {
             container.innerHTML = `
                 <div class="icon">📧</div>
-                <h1>Precisamos do seu email</h1>
-                <p>Para ativar seu premium, informe o email cadastrado no iStart:</p>
+                <h1 class="loading">Precisamos do seu email</h1>
+                <p style="margin: 8px 0 16px;">Para ativar seu premium, informe o email cadastrado no iStart:</p>
                 <input type="email" id="emailInput" placeholder="seu@email.com">
-                <button onclick="ativarComEmail()" class="btn" style="width: 100%; margin-top: 12px; cursor: pointer;">
-                    ✅ Ativar Premium
-                </button>
-                <p style="font-size: 0.8rem; color: #6b7280; margin-top: 8px;">
-                    Seu email está seguro. Usamos apenas para ativar sua conta.
-                </p>
-                <div class="detalhes-box"><strong>Parâmetros recebidos:</strong><br>${Object.entries(params).map(([k,v]) => `<strong>${k}:</strong> ${v}`).join('<br>') || 'Nenhum parâmetro'}</div>
-                <a href="${SISTEMA_URL}" class="btn btn-gray" style="display: inline-block; width: 100%; box-sizing: border-box; margin-top: 8px; text-align: center;">
-                    Voltar para o Sistema
-                </a>
+                <button onclick="ativarComEmail()" class="btn btn-success mt-8">✅ Ativar Premium</button>
+                <p class="text-sm mt-8">Seu email está seguro. Usamos apenas para ativar sua conta.</p>
+                <div class="detalhes-box mt-8"><strong>Parâmetros recebidos:</strong><br>${Object.entries(params).map(([k,v]) => `<strong>${k}:</strong> ${v}`).join('<br>') || 'Nenhum parâmetro'}</div>
+                <a href="${SISTEMA_URL}" class="btn btn-gray mt-8">Voltar para o Sistema</a>
             `;
 
-            // Função global para o botão
             window.ativarComEmail = async function() {
                 const emailInput = document.getElementById('emailInput');
                 const email = emailInput.value.trim();
@@ -241,59 +204,25 @@
                     return;
                 }
 
-                // Mostrar loading
-                container.innerHTML = `
-                    <div class="spinner"></div>
-                    <h1 class="loading">Ativando seu premium...</h1>
-                    <p>Por favor, aguarde.</p>
-                `;
+                mostrarCarregando();
 
                 try {
-                    const result = await ativarPremium(email, preapprovalId);
-                    
+                    const result = await ativarPremium(email);
                     if (result.success) {
                         mostrarSucesso(email);
                     } else {
-                        mostrarErro(result.error || 'Erro ao ativar premium. Entre em contato com o suporte.', email);
+                        mostrarErro(result.error || 'Erro ao ativar premium.', email);
                     }
-
                 } catch (error) {
-                    console.error('Erro ao ativar premium:', error);
                     mostrarErro('Erro ao ativar premium. Entre em contato com o suporte.', email);
                 }
             };
         }
 
         // ============================================================
-        // FUNÇÃO PARA BUSCAR USUÁRIO POR EMAIL
+        // FUNÇÃO PARA ATIVAR PREMIUM
         // ============================================================
-        async function buscarUsuarioPorEmail(email) {
-            try {
-                const response = await fetch(
-                    `${SUPABASE_URL}/rest/v1/usuarios?email=eq.${encodeURIComponent(email)}`,
-                    {
-                        headers: {
-                            'apikey': SUPABASE_KEY,
-                            'Authorization': `Bearer ${SUPABASE_KEY}`,
-                            'Content-Type': 'application/json'
-                        }
-                    }
-                );
-
-                if (!response.ok) throw new Error('Usuário não encontrado');
-                const usuarios = await response.json();
-                return usuarios[0] || null;
-
-            } catch (error) {
-                console.error('Erro ao buscar usuário:', error);
-                return null;
-            }
-        }
-
-        // ============================================================
-        // ATIVAR PREMIUM
-        // ============================================================
-        async function ativarPremium(email, preapprovalId) {
+        async function ativarPremium(email) {
             try {
                 const response = await fetch(
                     `${SUPABASE_URL}/functions/v1/ativar-premium`,
@@ -313,89 +242,66 @@
                 );
 
                 const result = await response.json();
-
-                if (!response.ok) {
-                    throw new Error(result.error || 'Erro ao ativar premium');
-                }
-
+                if (!response.ok) throw new Error(result.error || 'Erro ao ativar premium');
                 return result;
 
             } catch (error) {
-                console.error('❌ Erro ao ativar premium:', error);
+                console.error('❌ Erro:', error);
                 throw error;
             }
         }
 
         // ============================================================
-        // PROCESSAR O RETORNO DO MERCADO PAGO
+        // 🔥 NOVA LÓGICA: ATIVAR PREMIUM SE TIVER preapproval_id
         // ============================================================
-        async function processarPagamento() {
-            // Verificar se há parâmetros
+        function processarPagamento() {
+            // Se não tem parâmetros, mostrar erro
             if (Object.keys(params).length === 0) {
-                mostrarStatusDesconhecido();
+                mostrarErro('Nenhum parâmetro recebido. Você pode ter acessado esta página diretamente.', null);
                 return;
             }
 
-            // Verificar o status do pagamento
-            const statusPagamento = collectionStatus || params.status;
-            
-            if (statusPagamento === 'approved' || statusPagamento === 'pending') {
-                // Pagamento aprovado ou pendente - tentar ativar
+            // 🔥 SE TEM preapproval_id, ATIVAR PREMIUM IMEDIATAMENTE
+            if (preapprovalId) {
+                // Tentar buscar o email
                 let email = null;
 
-                // Tentar buscar email de várias formas
-                if (externalReference) {
-                    try {
-                        const usuario = await buscarUsuarioPorEmail(externalReference);
-                        if (usuario) {
-                            email = usuario.email;
-                        }
-                    } catch (error) {
-                        console.error('Erro ao buscar usuário:', error);
-                    }
-                }
-
-                if (!email && params.email) {
-                    email = params.email;
-                }
+                // Tenta pegar de várias fontes
+                if (params.email) email = params.email;
+                else if (externalReference) email = externalReference;
+                else if (params.payer_email) email = params.payer_email;
 
                 if (email) {
-                    // Ativar premium
                     mostrarCarregando();
-                    
-                    try {
-                        const result = await ativarPremium(email, preapprovalId);
-                        
-                        if (result.success) {
-                            mostrarSucesso(email);
-                        } else {
-                            mostrarErro(result.error || 'Erro ao ativar premium. Entre em contato com o suporte.', email);
-                        }
-
-                    } catch (error) {
-                        console.error('Erro ao ativar premium:', error);
-                        mostrarErro('Erro ao ativar premium. Entre em contato com o suporte.', email);
-                    }
+                    ativarPremium(email)
+                        .then(result => {
+                            if (result.success) {
+                                mostrarSucesso(email);
+                            } else {
+                                mostrarErro(result.error || 'Erro ao ativar premium. Entre em contato com o suporte.', email);
+                            }
+                        })
+                        .catch(() => {
+                            mostrarErro('Erro ao ativar premium. Entre em contato com o suporte.', email);
+                        });
                 } else {
-                    // Não encontrou email
+                    // Se não tem email, pedir ao usuário
                     mostrarCampoEmail();
                 }
-            } else if (statusPagamento === 'rejected') {
-                mostrarErro('Seu pagamento foi recusado. Tente novamente com outro cartão.', null);
             } else {
-                // Status desconhecido
-                mostrarStatusDesconhecido();
+                // Se não tem preapproval_id, mostrar erro
+                mostrarErro(
+                    'Nenhum ID de assinatura foi encontrado. Entre em contato com o suporte.',
+                    null
+                );
             }
         }
 
         // ============================================================
-        // INICIAR PROCESSAMENTO
+        // INICIAR
         // ============================================================
-        // Mostrar loading inicial
         mostrarCarregando();
-        
-        // Processar após 1 segundo
-        setTimeout(processarPagamento, 1000);
+        setTimeout(processarPagamento, 1500);
     </script>
 </body>
 </html>
