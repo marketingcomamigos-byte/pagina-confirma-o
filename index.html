@@ -16,27 +16,32 @@
             justify-content: center;
             align-items: center;
             min-height: 100vh;
-            background: #f5f7fa;
+            background: #081B2C;
             padding: 20px;
         }
         .container {
-            background: white;
+            background: #102F45;
             padding: 40px;
             border-radius: 16px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
             text-align: center;
             max-width: 500px;
             width: 100%;
+            border: 1px solid #21465E;
         }
         .icon { font-size: 4rem; margin-bottom: 16px; }
-        .success { color: #2e7d32; }
-        .error { color: #c62828; }
-        .warning { color: #e65100; }
-        .loading { color: #1a2a6c; }
+        .success { color: #18B981; }
+        .error { color: #E53E3E; }
+        .warning { color: #F59E0B; }
+        .loading { color: #00B8D9; }
+        .text-primary { color: #F5F9FC; }
+        .text-secondary { color: #91A4B3; }
+        .text-muted { color: #6A8BA0; }
+        
         .btn {
             display: inline-block;
             padding: 12px 24px;
-            background: #1a2a6c;
+            background: #00B8D9;
             color: white;
             text-decoration: none;
             border-radius: 8px;
@@ -49,47 +54,57 @@
         }
         .btn:hover { opacity: 0.9; }
         .btn:disabled { opacity: 0.5; cursor: not-allowed; }
-        .btn-success { background: #2e7d32; }
-        .btn-success:hover { background: #1b5e20; }
-        .btn-gray { background: #6b7280; }
-        .btn-gray:hover { background: #4b5563; }
+        .btn-success { background: #18B981; }
+        .btn-success:hover { background: #0D9668; }
+        .btn-gray { background: #6A8BA0; }
+        .btn-gray:hover { background: #4A6B80; }
         .btn-whatsapp { background: #25D366; }
         .btn-whatsapp:hover { background: #1da851; }
-        .btn-danger { background: #c62828; }
-        .btn-danger:hover { background: #b71c1c; }
+        .btn-danger { background: #E53E3E; }
+        .btn-danger:hover { background: #C53030; }
+        
         input[type="email"] {
             width: 100%;
             padding: 12px;
-            border: 2px solid #e5e7eb;
+            border: 2px solid #21465E;
             border-radius: 8px;
             font-size: 1rem;
             margin-top: 8px;
             box-sizing: border-box;
             transition: border-color 0.3s;
+            background: #1A3D55;
+            color: #F5F9FC;
+        }
+        input[type="email"]::placeholder {
+            color: #6A8BA0;
         }
         input[type="email"]:focus {
-            border-color: #1a2a6c;
+            border-color: #00B8D9;
             outline: none;
         }
         input[type="email"].error-input {
-            border-color: #c62828;
-            background: #fff5f5;
+            border-color: #E53E3E;
+            background: #2A1A1A;
         }
+        
         .detalhes-box {
-            background: #f8f9fa;
+            background: #081B2C;
             padding: 12px;
             border-radius: 8px;
             margin-top: 12px;
             font-size: 0.8rem;
-            color: #6b7280;
+            color: #6A8BA0;
             text-align: left;
             word-break: break-all;
             max-height: 150px;
             overflow-y: auto;
+            border: 1px solid #21465E;
         }
+        .detalhes-box strong { color: #91A4B3; }
+        
         .spinner {
-            border: 4px solid #f3f3f3;
-            border-top: 4px solid #1a2a6c;
+            border: 4px solid #21465E;
+            border-top: 4px solid #00B8D9;
             border-radius: 50%;
             width: 40px;
             height: 40px;
@@ -100,38 +115,59 @@
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
+        
         .mt-8 { margin-top: 8px; }
         .mt-16 { margin-top: 16px; }
         .flex { display: flex; }
         .flex-col { flex-direction: column; }
         .gap-8 { gap: 8px; }
-        .text-sm { font-size: 0.85rem; color: #6b7280; }
-        .text-error { color: #c62828; font-size: 0.85rem; }
+        .text-sm { font-size: 0.85rem; color: #91A4B3; }
+        .text-error { color: #E53E3E; font-size: 0.85rem; }
         .hidden { display: none; }
+        
         .tentativas-box {
-            background: #fff8e1;
-            border: 1px solid #ffcc80;
+            background: rgba(245,158,11,0.1);
+            border: 1px solid rgba(245,158,11,0.3);
             border-radius: 8px;
             padding: 12px;
             margin-top: 12px;
         }
         .tentativas-box .contador {
             font-weight: 700;
-            color: #e65100;
+            color: #F59E0B;
         }
+        
         .conta-info {
-            background: #e3f2fd;
+            background: rgba(0,184,217,0.1);
             padding: 16px;
             border-radius: 8px;
             margin: 8px 0;
             text-align: left;
+            border: 1px solid rgba(0,184,217,0.2);
         }
         .conta-info p {
             margin: 4px 0;
+            color: #F5F9FC;
         }
         .conta-info strong {
-            color: #0d47a1;
+            color: #00B8D9;
         }
+        
+        .logo {
+            font-size: 2rem;
+            font-weight: 800;
+            color: #00B8D9;
+            margin-bottom: 6px;
+            letter-spacing: -0.5px;
+        }
+        .logo-subtitle {
+            color: #91A4B3;
+            margin-bottom: 25px;
+            font-size: 0.9rem;
+            font-weight: 400;
+        }
+        h1 { color: #F5F9FC; }
+        p { color: #F5F9FC; }
     </style>
 </head>
 <body>
@@ -181,9 +217,11 @@
         // ============================================================
         function renderizar(icon, titulo, classe, mensagem, botoes, detalhes) {
             container.innerHTML = `
+                <div class="logo"><i class="fas fa-chart-line"></i> iStart</div>
+                <div class="logo-subtitle">Confirmação de Ativação Premium</div>
                 <div class="icon">${icon}</div>
                 <h1 class="${classe}">${titulo}</h1>
-                <p style="margin: 8px 0 16px;">${mensagem}</p>
+                <p style="margin: 8px 0 16px; color: #F5F9FC;">${mensagem}</p>
                 ${detalhes || ''}
                 <div class="flex flex-col gap-8 mt-16">
                     ${botoes || ''}
@@ -215,9 +253,6 @@
             );
         }
 
-        // ============================================================
-        // FUNÇÃO PARA MOSTRAR QUE A CONTA JÁ FOI ATIVADA
-        // ============================================================
         function mostrarContaJaAtivada(conta) {
             const dataFormatada = conta.ativado_em 
                 ? new Date(conta.ativado_em).toLocaleDateString('pt-BR') 
@@ -232,7 +267,7 @@
                     <div class="conta-info">
                         <p><strong>📧 Conta ativada:</strong> ${conta.email}</p>
                         <p><strong>📅 Data:</strong> ${dataFormatada}</p>
-                        <p style="font-size: 0.8rem; color: #6b7280; margin-top: 4px;">Cada código de pagamento só pode ser usado uma vez.</p>
+                        <p style="font-size: 0.8rem; color: #6A8BA0; margin-top: 4px;">Cada código de pagamento só pode ser usado uma vez.</p>
                     </div>
                     <a href="${SISTEMA_URL}" class="btn btn-gray">🔙 Voltar para o Sistema</a>
                 `,
@@ -240,9 +275,6 @@
             );
         }
 
-        // ============================================================
-        // FUNÇÃO PARA MOSTRAR CAMPO DE EMAIL COM TENTATIVAS
-        // ============================================================
         function mostrarCampoEmail(mensagemErro) {
             const tentativasRestantes = MAX_TENTATIVAS - tentativas;
             const podeTentar = tentativas < MAX_TENTATIVAS;
@@ -250,7 +282,7 @@
             let html = `
                 <div class="icon">📧</div>
                 <h1 class="${podeTentar ? 'loading' : 'error'}">${podeTentar ? 'Precisamos do seu email' : 'Não foi possível ativar'}</h1>
-                <p style="margin: 8px 0 16px;">
+                <p style="margin: 8px 0 16px; color: #F5F9FC;">
                     ${podeTentar 
                         ? 'Para ativar seu premium, informe o email cadastrado no iStart:' 
                         : 'Você atingiu o limite de tentativas. Entre em contato com o suporte.'}
@@ -264,7 +296,7 @@
             if (podeTentar) {
                 html += `
                     <div class="tentativas-box">
-                        <span class="contador">${tentativasRestantes}</span> tentativa(s) restante(s)
+                        <span class="contador">${tentativasRestantes}</span> <span style="color: #F5F9FC;">tentativa(s) restante(s)</span>
                     </div>
                     <input type="email" id="emailInput" placeholder="seu@email.com" value="${emailAtual}">
                     <button onclick="ativarComEmail()" class="btn btn-success mt-8">✅ Ativar Premium</button>
@@ -272,9 +304,9 @@
                 `;
             } else {
                 html += `
-                    <div class="tentativas-box" style="background:#ffebee; border-color:#ef9a9a;">
-                        <p style="color: #c62828; font-weight: 600;">⚠️ Limite de tentativas excedido</p>
-                        <p style="font-size: 0.85rem; margin-top: 4px;">Entre em contato com o suporte para ativar manualmente.</p>
+                    <div class="tentativas-box" style="background: rgba(229,62,62,0.1); border-color: rgba(229,62,62,0.3);">
+                        <p style="color: #E53E3E; font-weight: 600;">⚠️ Limite de tentativas excedido</p>
+                        <p style="font-size: 0.85rem; margin-top: 4px; color: #F5F9FC;">Entre em contato com o suporte para ativar manualmente.</p>
                     </div>
                     <a href="https://wa.me/${WHATSAPP_NUMERO}?text=Olá! Tentei ativar meu premium mas não consegui. Meu email é: ${emailAtual || 'não informado'}" 
                        class="btn btn-whatsapp mt-8">📱 Falar com Suporte</a>
@@ -345,10 +377,11 @@
         }
 
         // ============================================================
-        // FUNÇÃO PARA ATIVAR PREMIUM
+        // FUNÇÃO PARA ATIVAR PREMIUM (CHAMANDO A EDGE FUNCTION)
         // ============================================================
         async function ativarPremium(email) {
             try {
+                // 🔥 CHAMAR A EDGE FUNCTION (como fizemos no teste)
                 const response = await fetch(
                     `${SUPABASE_URL}/functions/v1/ativar-premium`,
                     {
@@ -358,31 +391,50 @@
                             'Content-Type': 'application/json'
                         },
                         body: JSON.stringify({
-                            email: email,
                             preapproval_id: preapprovalId,
-                            external_reference: externalReference,
-                            collection_id: collectionId
+                            email: email,
+                            external_reference: externalReference || email,
+                            collection_id: collectionId || null
                         })
                     }
                 );
 
                 const result = await response.json();
-                if (!response.ok) throw new Error(result.error || 'Erro ao ativar premium');
 
-                // Verificar se já foi ativado antes
-                if (result.already_activated) {
-                    return {
-                        success: true,
-                        already_activated: true,
-                        conta: result.conta
+                // Verificar se a Edge Function retornou sucesso
+                if (response.status === 200 && result.success) {
+                    // Se o usuário já era premium
+                    if (result.already_active) {
+                        return { 
+                            success: true, 
+                            already_activated: true,
+                            conta: {
+                                email: email,
+                                ativado_em: new Date().toISOString()
+                            }
+                        };
+                    }
+                    return { success: true };
+                }
+
+                // Se a Edge Function retornou erro, tratar
+                if (result.error) {
+                    return { success: false, error: result.error };
+                }
+
+                // Se a Edge Function retornou pending (ativação pendente)
+                if (result.pending) {
+                    return { 
+                        success: false, 
+                        error: 'ID validado, mas usuário não encontrado. Entre em contato com o suporte.'
                     };
                 }
 
-                return result;
+                return { success: false, error: 'Erro ao ativar premium' };
 
             } catch (error) {
-                console.error('❌ Erro:', error);
-                throw error;
+                console.error('❌ Erro ao ativar premium:', error);
+                return { success: false, error: error.message };
             }
         }
 
@@ -404,32 +456,10 @@
                 return;
             }
 
-            // 🔥 SE TEM preapproval_id, ATIVAR PREMIUM IMEDIATAMENTE
+            // Se tem preapproval_id, mostrar campo de email
             if (preapprovalId) {
-                let email = null;
-                if (params.email) email = params.email;
-                else if (externalReference) email = externalReference;
-                else if (params.payer_email) email = params.payer_email;
-
-                if (email) {
-                    tentativas = 1;
-                    mostrarCarregando();
-                    ativarPremium(email)
-                        .then(result => {
-                            if (result.already_activated) {
-                                mostrarContaJaAtivada(result.conta);
-                            } else if (result.success) {
-                                mostrarSucesso(email);
-                            } else {
-                                mostrarCampoEmail('Email não encontrado. Tente novamente.');
-                            }
-                        })
-                        .catch(() => {
-                            mostrarCampoEmail('Erro ao conectar. Tente novamente.');
-                        });
-                } else {
-                    mostrarCampoEmail();
-                }
+                // Verificar se já foi ativado
+                mostrarCampoEmail();
             } else {
                 renderizar(
                     '❌',
