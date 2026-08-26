@@ -5,12 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Confirmação - iStart</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Segoe UI', system-ui, sans-serif;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', system-ui, sans-serif; }
         body {
             display: flex;
             justify-content: center;
@@ -37,7 +32,7 @@
         .text-primary { color: #F5F9FC; }
         .text-secondary { color: #91A4B3; }
         .text-muted { color: #6A8BA0; }
-        
+
         .btn {
             display: inline-block;
             padding: 12px 24px;
@@ -60,9 +55,7 @@
         .btn-gray:hover { background: #4A6B80; }
         .btn-whatsapp { background: #25D366; }
         .btn-whatsapp:hover { background: #1da851; }
-        .btn-danger { background: #E53E3E; }
-        .btn-danger:hover { background: #C53030; }
-        
+
         input[type="email"] {
             width: 100%;
             padding: 12px;
@@ -75,9 +68,7 @@
             background: #1A3D55;
             color: #F5F9FC;
         }
-        input[type="email"]::placeholder {
-            color: #6A8BA0;
-        }
+        input[type="email"]::placeholder { color: #6A8BA0; }
         input[type="email"]:focus {
             border-color: #00B8D9;
             outline: none;
@@ -86,7 +77,7 @@
             border-color: #E53E3E;
             background: #2A1A1A;
         }
-        
+
         .detalhes-box {
             background: #081B2C;
             padding: 12px;
@@ -101,7 +92,7 @@
             border: 1px solid #21465E;
         }
         .detalhes-box strong { color: #91A4B3; }
-        
+
         .spinner {
             border: 4px solid #21465E;
             border-top: 4px solid #00B8D9;
@@ -115,7 +106,7 @@
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
-        
+
         .mt-8 { margin-top: 8px; }
         .mt-16 { margin-top: 16px; }
         .flex { display: flex; }
@@ -123,8 +114,7 @@
         .gap-8 { gap: 8px; }
         .text-sm { font-size: 0.85rem; color: #91A4B3; }
         .text-error { color: #E53E3E; font-size: 0.85rem; }
-        .hidden { display: none; }
-        
+
         .tentativas-box {
             background: rgba(245,158,11,0.1);
             border: 1px solid rgba(245,158,11,0.3);
@@ -132,11 +122,8 @@
             padding: 12px;
             margin-top: 12px;
         }
-        .tentativas-box .contador {
-            font-weight: 700;
-            color: #F59E0B;
-        }
-        
+        .tentativas-box .contador { font-weight: 700; color: #F59E0B; }
+
         .conta-info {
             background: rgba(0,184,217,0.1);
             padding: 16px;
@@ -145,14 +132,9 @@
             text-align: left;
             border: 1px solid rgba(0,184,217,0.2);
         }
-        .conta-info p {
-            margin: 4px 0;
-            color: #F5F9FC;
-        }
-        .conta-info strong {
-            color: #00B8D9;
-        }
-        
+        .conta-info p { margin: 4px 0; color: #F5F9FC; }
+        .conta-info strong { color: #00B8D9; }
+
         .logo {
             font-size: 2rem;
             font-weight: 800;
@@ -168,6 +150,26 @@
         }
         h1 { color: #F5F9FC; }
         p { color: #F5F9FC; }
+
+        .loading-indicator {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 16px;
+        }
+
+        /* Classe para esconder elementos */
+        .hidden { display: none !important; }
+
+        /* Botão de voltar */
+        .btn-voltar-email {
+            background: #6A8BA0;
+            color: white;
+        }
+        .btn-voltar-email:hover {
+            background: #4A6B80;
+        }
     </style>
 </head>
 <body>
@@ -197,9 +199,6 @@
         console.log('📥 Parâmetros recebidos:', params);
 
         const preapprovalId = params.preapproval_id || params.pref_id;
-        const status = params.status || params.collection_status;
-        const externalReference = params.external_reference;
-        const collectionId = params.collection_id || params.payment_id;
 
         // ============================================================
         // ESTADO
@@ -234,7 +233,18 @@
                 '⏳',
                 'Processando...',
                 'loading',
-                'Aguarde enquanto ativamos seu premium.',
+                'Aguarde enquanto verificamos seu pagamento.',
+                '',
+                `<div class="spinner"></div>`
+            );
+        }
+
+        function mostrarValidando() {
+            renderizar(
+                '🔍',
+                'Validando...',
+                'loading',
+                'Verificando seu código de ativação no Mercado Pago.',
                 '',
                 `<div class="spinner"></div>`
             );
@@ -246,6 +256,19 @@
                 'Premium Ativado com Sucesso!',
                 'success',
                 `Agora você tem acesso a todas as funcionalidades premium do iStart.`,
+                `
+                    <a href="${SISTEMA_URL}" class="btn btn-success">🚀 Ir para o Sistema</a>
+                `,
+                `<p class="text-sm">✅ Email: ${email}</p>`
+            );
+        }
+
+        function mostrarJaPremium(email) {
+            renderizar(
+                '🌟',
+                'Você já é Premium!',
+                'success',
+                `O usuário ${email} já possui o plano Premium ativo.`,
                 `
                     <a href="${SISTEMA_URL}" class="btn btn-success">🚀 Ir para o Sistema</a>
                 `,
@@ -272,6 +295,22 @@
                     <a href="${SISTEMA_URL}" class="btn btn-gray">🔙 Voltar para o Sistema</a>
                 `,
                 `<p class="text-sm">Se você não reconhece esta conta, entre em contato com o suporte.</p>`
+            );
+        }
+
+        function mostrarUsuarioNaoEncontrado() {
+            renderizar(
+                '❌',
+                'Usuário não encontrado',
+                'error',
+                `O e-mail informado não está cadastrado no iStart.`,
+                `
+                    <button onclick="voltarParaEmail()" class="btn btn-gray mt-8">🔄 Tentar outro e-mail</button>
+                    <a href="https://wa.me/${WHATSAPP_NUMERO}?text=Olá! Tentei ativar meu premium mas não encontrei meu email." 
+                       class="btn btn-whatsapp mt-8">📱 Falar com Suporte</a>
+                    <a href="${SISTEMA_URL}" class="btn btn-gray mt-8">Voltar para o Sistema</a>
+                `,
+                `<p class="text-sm">Certifique-se de usar o mesmo e-mail que você usou para se cadastrar no iStart.</p>`
             );
         }
 
@@ -316,6 +355,7 @@
 
             html += `
                 <div class="detalhes-box mt-8">
+                    <strong>ID da Assinatura:</strong> ${preapprovalId || 'Não informado'}<br>
                     <strong>Parâmetros recebidos:</strong><br>
                     ${Object.entries(params).map(([k,v]) => `<strong>${k}:</strong> ${v}`).join('<br>') || 'Nenhum parâmetro'}
                 </div>
@@ -348,20 +388,32 @@
                 tentativas++;
                 emailAtual = email;
 
-                mostrarCarregando();
+                mostrarValidando();
 
                 try {
+                    console.log(`🚀 Chamando Edge Function com: preapproval_id=${preapprovalId}, email=${email}`);
+                    
                     const result = await ativarPremium(email);
+                    
+                    console.log('📥 Resposta da Edge Function:', result);
+                    
                     if (result.success) {
                         if (result.already_activated) {
                             mostrarContaJaAtivada(result.conta);
+                        } else if (result.already_active) {
+                            mostrarJaPremium(email);
                         } else {
                             mostrarSucesso(email);
                         }
                     } else {
-                        mostrarCampoEmail(result.error || 'Email não encontrado. Tente novamente.');
+                        if (result.error && result.error.includes('Usuário não encontrado')) {
+                            mostrarUsuarioNaoEncontrado();
+                        } else {
+                            mostrarCampoEmail(result.error || 'Erro ao ativar. Tente novamente.');
+                        }
                     }
                 } catch (error) {
+                    console.error('❌ Erro na ativação:', error);
                     mostrarCampoEmail('Erro ao conectar. Tente novamente.');
                 }
             };
@@ -376,12 +428,18 @@
             }
         }
 
+        function voltarParaEmail() {
+            tentativas = 0;
+            emailAtual = '';
+            mostrarCampoEmail();
+        }
+
         // ============================================================
         // FUNÇÃO PARA ATIVAR PREMIUM (CHAMANDO A EDGE FUNCTION)
         // ============================================================
         async function ativarPremium(email) {
             try {
-                // 🔥 CHAMAR A EDGE FUNCTION (como fizemos no teste)
+                // 🔥 CHAMAR A EDGE FUNCTION
                 const response = await fetch(
                     `${SUPABASE_URL}/functions/v1/ativar-premium`,
                     {
@@ -392,45 +450,25 @@
                         },
                         body: JSON.stringify({
                             preapproval_id: preapprovalId,
-                            email: email,
-                            external_reference: externalReference || email,
-                            collection_id: collectionId || null
+                            email: email
                         })
                     }
                 );
 
                 const result = await response.json();
+                console.log('📥 Resposta da Edge Function:', result);
 
-                // Verificar se a Edge Function retornou sucesso
-                if (response.status === 200 && result.success) {
-                    // Se o usuário já era premium
-                    if (result.already_active) {
-                        return { 
-                            success: true, 
-                            already_activated: true,
-                            conta: {
-                                email: email,
-                                ativado_em: new Date().toISOString()
-                            }
-                        };
-                    }
-                    return { success: true };
+                // Se a resposta for 200 OK
+                if (response.status === 200) {
+                    return result;
                 }
 
-                // Se a Edge Function retornou erro, tratar
+                // Se a Edge Function retornou erro
                 if (result.error) {
                     return { success: false, error: result.error };
                 }
 
-                // Se a Edge Function retornou pending (ativação pendente)
-                if (result.pending) {
-                    return { 
-                        success: false, 
-                        error: 'ID validado, mas usuário não encontrado. Entre em contato com o suporte.'
-                    };
-                }
-
-                return { success: false, error: 'Erro ao ativar premium' };
+                return { success: false, error: 'Erro desconhecido ao ativar premium' };
 
             } catch (error) {
                 console.error('❌ Erro ao ativar premium:', error);
@@ -442,45 +480,57 @@
         // PROCESSAR O RETORNO
         // ============================================================
         function processarPagamento() {
-            if (Object.keys(params).length === 0) {
-                renderizar(
-                    '🤔',
-                    'Nenhum parâmetro recebido',
-                    'error',
-                    'Você pode ter acessado esta página diretamente.',
-                    `
-                        <a href="${SISTEMA_URL}" class="btn btn-gray">🔙 Voltar para o Sistema</a>
-                    `,
-                    ''
-                );
-                return;
-            }
-
-            // Se tem preapproval_id, mostrar campo de email
-            if (preapprovalId) {
-                // Verificar se já foi ativado
-                mostrarCampoEmail();
-            } else {
+            if (!preapprovalId) {
                 renderizar(
                     '❌',
                     'Código não encontrado',
                     'error',
-                    'Nenhum ID de assinatura foi encontrado.',
+                    'Nenhum ID de assinatura foi encontrado na URL.',
                     `
-                        <a href="https://wa.me/${WHATSAPP_NUMERO}?text=Olá! Tentei ativar meu premium mas não consegui." 
-                           class="btn btn-whatsapp">📱 Falar com Suporte</a>
-                        <a href="${SISTEMA_URL}" class="btn btn-gray">Voltar para o Sistema</a>
+                        <a href="${SISTEMA_URL}" class="btn btn-gray">🔙 Voltar para o Sistema</a>
                     `,
                     `<div class="detalhes-box"><strong>Parâmetros recebidos:</strong><br>${Object.entries(params).map(([k,v]) => `<strong>${k}:</strong> ${v}`).join('<br>') || 'Nenhum'}</div>`
                 );
+                return;
             }
+
+            // 🔥 Primeiro, verificar se o ID já foi ativado
+            mostrarCarregando();
+            
+            // Verificar rapidamente se já existe ativação
+            fetch(
+                `${SUPABASE_URL}/rest/v1/ativacoes_premium?preapproval_id=eq.${preapprovalId}`,
+                { headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}`, 'Content-Type': 'application/json' } }
+            )
+            .then(res => res.json())
+            .then(data => {
+                console.log('📥 Verificação de ativação existente:', data);
+                if (data && data.length > 0) {
+                    // Já foi ativado
+                    mostrarContaJaAtivada(data[0]);
+                } else {
+                    // Mostrar campo de email para ativação
+                    mostrarCampoEmail();
+                }
+            })
+            .catch((error) => {
+                console.error('❌ Erro ao verificar ativação existente:', error);
+                // Em caso de erro, mostrar campo de email mesmo assim
+                mostrarCampoEmail();
+            });
         }
 
         // ============================================================
         // INICIAR
         // ============================================================
+        console.log('🚀 Página de confirmação iniciada');
+        console.log('📥 ID da assinatura:', preapprovalId);
+        
+        // Mostrar carregando enquanto verifica
         mostrarCarregando();
-        setTimeout(processarPagamento, 1500);
+        
+        // Processar após 1 segundo
+        setTimeout(processarPagamento, 1000);
     </script>
 </body>
 </html>
